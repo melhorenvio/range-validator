@@ -25,160 +25,273 @@ class RangeValidatorTest extends TestCase
                 'begin' => '4',
                 'end' => '5'
             ],
-            // [
-            //     'begin' => '5',
-            //     'end' => '4'
-            // ],
+            [
+                'begin' => '5',
+                'end' => '4'
+            ],
             [
                 'begin' => '2',
                 'end' => null
             ]
         ];
 
-        $validatedRanges = $rangeValidator->checkAll($ranges);
+        $invalidRanges = $rangeValidator->getAllInvalidRanges($ranges);
 
-        $this->assertEquals($validatedRanges,[
+        $this->assertEquals($invalidRanges,[
             [
-                'begin' => '2',
-                'end' => null,
-                'message' => 'Este trecho possui valores vazios ou nulos',
-                'code' => '1'
+                "message" => "Estes trechos possuem valores vazios ou nulos",
+                "code" => "1",
+                "ranges" => [
+                    [
+                        "begin" => "2",
+                        "end" => null
+                    ]
+                ]
             ],
-            // [
-            //     'begin' => '5',
-            //     'end' => '4',
-            //     'message' => 'Este trecho possui o inicio maior que o fim',
-            //     'code' => '3'
-            // ]
+            [
+                "message" => "Estes trechos estão repetidos ou sobrepostos a outro trecho",
+                "code" => "2",
+                "ranges" => [
+                    [
+                        "begin" => "1",
+                        "end" => "2"
+                    ],
+                    [
+                        "begin" => "3",
+                        "end" => "8"
+                    ],
+                    [
+                        "begin" => "4",
+                        "end" => "5"
+                    ]
+                ]
+            ],
+            [
+                "message" => "Estes trechos possuem o inicio maior que o fim",
+                "code" => "3",
+                "ranges" => [
+                    [
+                        "begin" => "5",
+                        "end" => "4"
+                    ]
+                ]
+            ]
         ]);
     }
 
-    // /** @test */
-    // public function it_validates_null_ranges()
-    // {
-    //     $rangeValidator = new RangeValidator();
+    /** @test */
+    public function it_validates_null_ranges()
+    {
+        $rangeValidator = new RangeValidator();
 
-    //     $ranges = [
-    //         [
-    //             'begin' => '12345678',
-    //             'end' => '23456789'
-    //         ],
-    //         [
-    //             'begin' => null,
-    //             'end' => '23456789'
-    //         ],
-    //         [
-    //             'begin' => '12345678',
-    //             'end' => ''
-    //         ],
-    //         [
-    //             'begin' => '34567890',
-    //             'end' => '45678901'
-    //         ]
-    //     ];
+        $ranges = [
+            [
+                'begin' => '1',
+                'end' => '2'
+            ],
+            [
+                'begin' => '3',
+                'end' => '8'
+            ],
+            [
+                'begin' => '4',
+                'end' => '5'
+            ],
+            [
+                'begin' => '5',
+                'end' => '4'
+            ],
+            [
+                'begin' => '2',
+                'end' => null
+            ]
+        ];
 
-    //     $validatedRanges = $rangeValidator->checkNullRanges($ranges);
+        $invalidRanges = $rangeValidator->getNullRanges($ranges);
 
-    //     $this->assertEquals($validatedRanges,
-    //     [
-    //         [
-    //             'begin' => null,
-    //             'end' => '23456789',
-    //             'message' => 'Este trecho possui valores vazios ou nulos',
-    //             'code' => '1'
-    //         ],
-    //         [
-    //             'begin' => '12345678',
-    //             'end' => '',
-    //             'message' => 'Este trecho possui valores vazios ou nulos',
-    //             'code' => '1'
-    //         ]
-    //     ]);
-    // }
+        $this->assertEquals($invalidRanges,[
+            [
+                "message" => "Estes trechos possuem valores vazios ou nulos",
+                "code" => "1",
+                "ranges" => [
+                    [
+                        "begin" => "2",
+                        "end" => null
+                    ]
+                ]
+            ]
+        ]);
+    }
 
-    // /** @test */
-    // public function it_validates_repeated_ranges()
-    // {
-    //     $rangeValidator = new RangeValidator();
+    /** @test */
+    public function it_validates_overlapped_ranges()
+    {
+        $rangeValidator = new RangeValidator();
 
-    //     $ranges = [
-    //         [
-    //             'begin' => '1',
-    //             'end' => '2'
-    //         ],
-    //         [
-    //             'begin' => '3',
-    //             'end' => '8'
-    //         ],
-    //         [
-    //             'begin' => '4',
-    //             'end' => '5'
-    //         ],
-    //         [
-    //             'begin' => '9',
-    //             'end' => '10'
-    //         ]
-    //     ];
+        $ranges = [
+            [
+                'begin' => '1',
+                'end' => '2'
+            ],
+            [
+                'begin' => '3',
+                'end' => '8'
+            ],
+            [
+                'begin' => '4',
+                'end' => '5'
+            ],
+            [
+                'begin' => '5',
+                'end' => '4'
+            ],
+            [
+                'begin' => '2',
+                'end' => null
+            ]
+        ];
 
-    //     $validatedRanges = $rangeValidator->checkOverlapping($ranges);
+        $invalidRanges = $rangeValidator->getOverlappedRanges($ranges);
 
-    //     $this->assertEquals($validatedRanges,
-    //     [
-    //         [
-    //             'begin' => '3',
-    //             'end' => '8',
-    //             'message' => 'Este trecho está repetido ou sobreposto a outro trecho',
-    //             'code' => '2'
-    //         ],
-    //         [
-    //             'begin' => '4',
-    //             'end' => '5',
-    //             'message' => 'Este trecho está repetido ou sobreposto a outro trecho',
-    //             'code' => '2'
-    //         ]
-    //     ]);
-    // }
+        $this->assertEquals($invalidRanges,[
+            [
+                "message" => "Estes trechos estão repetidos ou sobrepostos a outro trecho",
+                "code" => "2",
+                "ranges" => [
+                    [
+                        "begin" => "1",
+                        "end" => "2"
+                    ],
+                    [
+                        "begin" => "3",
+                        "end" => "8"
+                    ],
+                    [
+                        "begin" => "4",
+                        "end" => "5"
+                    ]
+                ]
+            ]
+        ]);
+    }
 
-    // /** @test */
-    // public function it_validates_begin_bigger_than_end()
-    // {
-    //     $rangeValidator = new RangeValidator();
+    /** @test */
+    public function it_validates_begin_bigger_ranges()
+    {
+        $rangeValidator = new RangeValidator();
 
-    //     $ranges = [
-    //         [
-    //             'begin' => '12345678',
-    //             'end' => '23456789'
-    //         ],
-    //         [
-    //             'begin' => '34567890',
-    //             'end' => '23456789'
-    //         ],
-    //         [
-    //             'begin' => '12345678',
-    //             'end' => '01234567'
-    //         ],
-    //         [
-    //             'begin' => '34567890',
-    //             'end' => '45678901'
-    //         ]
-    //     ];
+        $ranges = [
+            [
+                'begin' => '1',
+                'end' => '2'
+            ],
+            [
+                'begin' => '3',
+                'end' => '8'
+            ],
+            [
+                'begin' => '4',
+                'end' => '5'
+            ],
+            [
+                'begin' => '5',
+                'end' => '4'
+            ],
+            [
+                'begin' => '2',
+                'end' => null
+            ]
+        ];
 
-    //     $validatedRanges = $rangeValidator->checkBeginBiggerThanEnd($ranges);
+        $invalidRanges = $rangeValidator->getBeginBiggerRanges($ranges);
 
-    //     $this->assertEquals($validatedRanges,
-    //     [
-    //         [
-    //             'begin' => '34567890',
-    //             'end' => '23456789',
-    //             'message' => 'Este trecho possui o inicio maior que o fim',
-    //             'code' => '3'
-    //         ],
-    //         [
-    //             'begin' => '12345678',
-    //             'end' => '01234567',
-    //             'message' => 'Este trecho possui o inicio maior que o fim',
-    //             'code' => '3'
-    //         ]
-    //     ]);
-    // }
+        $this->assertEquals($invalidRanges,[
+            [
+                "message" => "Estes trechos possuem o inicio maior que o fim",
+                "code" => "3",
+                "ranges" => [
+                    [
+                        "begin" => "5",
+                        "end" => "4"
+                    ]
+                ]
+            ]
+        ]);
+    }
+
+    /** @test */
+    public function it_validates_null_value()
+    {
+        $rangeValidator = new RangeValidator();
+
+        $ranges = [
+                'begin' => null,
+                'end' => '23456789'
+            ];
+
+        $invalidRange = $rangeValidator->nullValue($ranges);
+
+        $this->assertEquals($invalidRange,
+        [
+            'begin' => null,
+            'end' => '23456789'
+        ]);
+    }
+
+    /** @test */
+    public function it_validates_overlapping()
+    {
+        $rangeValidator = new RangeValidator();
+
+        $ranges = [
+            [
+                'begin' => '1',
+                'end' => '2'
+            ],
+            [
+                'begin' => '3',
+                'end' => '8'
+            ],
+            [
+                'begin' => '4',
+                'end' => '5'
+            ],
+            [
+                'begin' => '9',
+                'end' => '10'
+            ]
+        ];
+
+        $range = [
+            'begin' => '3',
+            'end' => '8'
+        ];
+
+        $invalidRange = $rangeValidator->overlapping($range, $ranges);
+
+        $this->assertEquals($invalidRange,
+        [
+            'begin' => '3',
+            'end' => '8'
+        ]);
+    }
+
+    /** @test */
+    public function it_validates_begin_bigger_than_end()
+    {
+        $rangeValidator = new RangeValidator();
+
+        $ranges = [
+            'begin' => '34567890',
+            'end' => '23456789'
+        ];
+
+        $invalidRange = $rangeValidator->beginBiggerThanEnd($ranges);
+
+        $this->assertEquals($invalidRange,
+        [
+            'begin' => '34567890',
+            'end' => '23456789'
+        ]);
+    }
 }

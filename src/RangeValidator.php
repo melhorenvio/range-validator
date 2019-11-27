@@ -3,67 +3,105 @@
 namespace Melhorenvio\RangeValidator;
 
 use Illuminate\Support\Collection;
-use Melhorenvio\RangeValidator\ExceptionConstants;
+use Melhorenvio\RangeValidator\MessageConstants;
 
 class RangeValidator
 {
+    public function getEmptyRanges(Array $ranges) {
+        return $this->getAllInvalidRanges($ranges, MessageConstants::EMPTY_CODE_EXCEPTION);
+    }
 
-    public function checkAll(Array $ranges) {
-        $nullRanges = [];
+    public function getOverlappedRanges(Array $ranges) {
+        return $this->getAllInvalidRanges($ranges, MessageConstants::OVERLAPPING_CODE_EXCEPTION);
+    }
+
+    public function getBeginBiggerRanges(Array $ranges) {
+        return $this->getAllInvalidRanges($ranges, MessageConstants::BEGIN_BIGGER_THAN_END_CODE_EXCEPTION);
+    }
+
+    public function getAllInvalidRanges(Array $ranges, $type = null) {
+        if (!count($ranges)) {
+            return [
+                'message' => MessageConstants::EMPTY_PARAMETER_MESSAGE_EXCEPTION,
+                'code' => MessageConstants::EMPTY_PARAMETER_CODE_EXCEPTION
+            ];
+        }
+
+        $emptyRanges = [];
         $beginBiggerRanges = [];
         $overlappedRanges = [];
+        $invalidParameters = [];
+        $invalidRanges = [];
 
         foreach ($ranges as $range) {
-            $invalidRange = $this->checkNullRanges($range);
-
-            if (!empty($invalidRange)) {
-                $nullRanges[] = $invalidRange;
+            if (!$this->validateParameter($range)) {
+                $invalidParameters[] = $range;
                 continue;
             }
 
-            $invalidRange = $this->checkBeginBiggerThanEnd($range);
+            $invalidRange = $this->emptyValue($range);
+
+            if (!empty($invalidRange)) {
+                $emptyRanges[] = $invalidRange;
+                continue;
+            }
+
+            $invalidRange = $this->beginBiggerThanEnd($range);
 
             if (!empty($invalidRange)) {
                 $beginBiggerRanges[] = $invalidRange;
-                continue;
             }
 
-            $invalidRange = $this->checkOverlapping($range, $ranges);
+            $invalidRange = $this->overlapping($range, $ranges);
 
             if (!empty($invalidRange)) {
                 $overlappedRanges[] = $invalidRange;
             }
         }
 
-        if (count($nullRanges)) {
-            $invalidRanges[] = [
-                'message' => ExceptionConstants::NULL_MESSAGE_EXCEPTION,
-                'code' => ExceptionConstants::NULL_CODE_EXCEPTION,
-                'ranges' => $nullRanges
+        if (count($invalidParameters)) {
+            return [
+                'message' => MessageConstants::INVALID_PARAMETER_MESSAGE_EXCEPTION,
+                'code' => MessageConstants::INVALID_PARAMETER_CODE_EXCEPTION,
+                'data' => $invalidParameters
             ];
         }
 
-        if (count($overlappedRanges)) {
+        if (count($emptyRanges) && (empty($type) || $type === MessageConstants::EMPTY_CODE_EXCEPTION)) {
             $invalidRanges[] = [
-                'message' => ExceptionConstants::OVERLAPPING_MESSAGE_EXCEPTION,
-                'code' => ExceptionConstants::OVERLAPPING_CODE_EXCEPTION,
-                'ranges' => $overlappedRanges
+                'message' => MessageConstants::EMPTY_MESSAGE_EXCEPTION,
+                'code' => MessageConstants::EMPTY_CODE_EXCEPTION,
+                'data' => $emptyRanges
             ];
         }
 
-        if (count($beginBiggerRanges)) {
+        if (count($beginBiggerRanges) && (empty($type) || $type === MessageConstants::BEGIN_BIGGER_THAN_END_CODE_EXCEPTION)) {
             $invalidRanges[] = [
-                'message' => ExceptionConstants::BEGIN_BIGGER_THAN_END_MESSAGE_EXCEPTION,
-                'code' => ExceptionConstants::BEGIN_BIGGER_THAN_END_CODE_EXCEPTION,
-                'ranges' => $beginBiggerRanges
+                'message' => MessageConstants::BEGIN_BIGGER_THAN_END_MESSAGE_EXCEPTION,
+                'code' => MessageConstants::BEGIN_BIGGER_THAN_END_CODE_EXCEPTION,
+                'data' => $beginBiggerRanges
             ];
         }
 
-        return $invalidRanges;
+        if (count($overlappedRanges) && (empty($type) || $type === MessageConstants::OVERLAPPING_CODE_EXCEPTION)) {
+            $invalidRanges[] = [
+                'message' => MessageConstants::OVERLAPPING_MESSAGE_EXCEPTION,
+                'code' => MessageConstants::OVERLAPPING_CODE_EXCEPTION,
+                'data' => $overlappedRanges
+            ];
+        }
+
+        if (count($invalidRanges)) {
+            return $invalidRanges;
+        }
+
+        return [
+            'message' => MessageConstants::SUCCESS_MESSAGE,
+            'code' => MessageConstants::SUCCESS_CODE
+        ];
     }
 
-    public function checkNullRanges(Array $range) {
-
+    public function emptyValue(Array $range) {
         if(!empty($range['begin']) && !empty($range['end'])) {
             return null;
         }
@@ -71,19 +109,18 @@ class RangeValidator
         return $range;
     }
 
-    public function checkOverlapping(Array $range, Array $ranges)
+    public function overlapping(Array $range, Array $ranges)
     {
         $ranges = collect($ranges);
 
-        if (count($this->getOverlappedRanges($ranges, $range)) <= 1) {
+        if (count($this->getOverlappedRangesCollection($ranges, $range)) <= 1) {
             return null;
         }
 
         return $range;
     }
 
-    public function checkBeginBiggerThanEnd(Array $range) {
-
+    public function beginBiggerThanEnd(Array $range) {
         if($range['begin'] <= $range['end']) {
             return null;
         }
@@ -91,8 +128,36 @@ class RangeValidator
         return $range;
     }
 
-    private function getOverlappedRanges(Collection $ranges, Array $range) {
+    private function getOverlappedRangesCollection(Collection $ranges, Array $range) {
         $overlappedRanges = $ranges->whereBetween('begin', $range);
+
+        $overlappedRanges = $ranges->where('begin', '<=', $range['begin'])->where('end', '>=', $range['end']);
+
         return $overlappedRanges->merge($ranges->whereBetween('end', $range))->unique();
+    }
+
+    private function validateParameter($range)
+    {
+        if (gettype($range) != 'array') {
+            return false;
+        }
+
+        if (!isset($range['begin'])) {
+            return false;
+        }
+
+        if (gettype($range['begin']) != 'string') {
+            return false;
+        }
+
+        if (!isset($range['end'])) {
+            return false;
+        }
+
+        if (gettype($range['end']) != 'string') {
+            return false;
+        }
+
+        return true;
     }
 }
