@@ -31,7 +31,7 @@ class RangeValidatorTest extends TestCase
             ],
             [
                 'begin' => '2',
-                'end' => null
+                'end' => ''
             ]
         ];
 
@@ -39,23 +39,29 @@ class RangeValidatorTest extends TestCase
 
         $this->assertEquals($invalidRanges,[
             [
-                "message" => "Estes trechos possuem valores vazios ou nulos",
-                "code" => "1",
-                "ranges" => [
+                "message" => "These ranges have empty values",
+                "code" => 1,
+                "data" => [
                     [
                         "begin" => "2",
-                        "end" => null
+                        "end" => ''
                     ]
                 ]
             ],
             [
-                "message" => "Estes trechos estão repetidos ou sobrepostos a outro trecho",
-                "code" => "2",
-                "ranges" => [
+                "message" => "These ranges have the begin bigger than the end",
+                "code" => 3,
+                "data" => [
                     [
-                        "begin" => "1",
-                        "end" => "2"
-                    ],
+                        "begin" => "5",
+                        "end" => "4"
+                    ]
+                ]
+            ],
+            [
+                "message" => "These ranges are repeated or overlapped with another range",
+                "code" => 2,
+                "data" => [
                     [
                         "begin" => "3",
                         "end" => "8"
@@ -63,13 +69,7 @@ class RangeValidatorTest extends TestCase
                     [
                         "begin" => "4",
                         "end" => "5"
-                    ]
-                ]
-            ],
-            [
-                "message" => "Estes trechos possuem o inicio maior que o fim",
-                "code" => "3",
-                "ranges" => [
+                    ],
                     [
                         "begin" => "5",
                         "end" => "4"
@@ -80,7 +80,7 @@ class RangeValidatorTest extends TestCase
     }
 
     /** @test */
-    public function it_validates_null_ranges()
+    public function it_validates_empty_ranges()
     {
         $rangeValidator = new RangeValidator();
 
@@ -103,20 +103,20 @@ class RangeValidatorTest extends TestCase
             ],
             [
                 'begin' => '2',
-                'end' => null
+                'end' => ''
             ]
         ];
 
-        $invalidRanges = $rangeValidator->getNullRanges($ranges);
+        $invalidRanges = $rangeValidator->getemptyRanges($ranges);
 
         $this->assertEquals($invalidRanges,[
             [
-                "message" => "Estes trechos possuem valores vazios ou nulos",
-                "code" => "1",
-                "ranges" => [
+                "message" => "These ranges have empty values",
+                "code" => 1,
+                "data" => [
                     [
                         "begin" => "2",
-                        "end" => null
+                        "end" => ''
                     ]
                 ]
             ]
@@ -147,7 +147,7 @@ class RangeValidatorTest extends TestCase
             ],
             [
                 'begin' => '2',
-                'end' => null
+                'end' => ''
             ]
         ];
 
@@ -155,13 +155,9 @@ class RangeValidatorTest extends TestCase
 
         $this->assertEquals($invalidRanges,[
             [
-                "message" => "Estes trechos estão repetidos ou sobrepostos a outro trecho",
-                "code" => "2",
-                "ranges" => [
-                    [
-                        "begin" => "1",
-                        "end" => "2"
-                    ],
+                "message" => "These ranges are repeated or overlapped with another range",
+                "code" => 2,
+                "data" => [
                     [
                         "begin" => "3",
                         "end" => "8"
@@ -169,6 +165,10 @@ class RangeValidatorTest extends TestCase
                     [
                         "begin" => "4",
                         "end" => "5"
+                    ],
+                    [
+                        "begin" => "5",
+                        "end" => "4"
                     ]
                 ]
             ]
@@ -199,7 +199,7 @@ class RangeValidatorTest extends TestCase
             ],
             [
                 'begin' => '2',
-                'end' => null
+                'end' => ''
             ]
         ];
 
@@ -207,9 +207,9 @@ class RangeValidatorTest extends TestCase
 
         $this->assertEquals($invalidRanges,[
             [
-                "message" => "Estes trechos possuem o inicio maior que o fim",
-                "code" => "3",
-                "ranges" => [
+                "message" => "These ranges have the begin bigger than the end",
+                "code" => 3,
+                "data" => [
                     [
                         "begin" => "5",
                         "end" => "4"
@@ -220,20 +220,20 @@ class RangeValidatorTest extends TestCase
     }
 
     /** @test */
-    public function it_validates_null_value()
+    public function it_validates_empty_value()
     {
         $rangeValidator = new RangeValidator();
 
         $ranges = [
-                'begin' => null,
+                'begin' => '',
                 'end' => '23456789'
             ];
 
-        $invalidRange = $rangeValidator->nullValue($ranges);
+        $invalidRange = $rangeValidator->emptyValue($ranges);
 
         $this->assertEquals($invalidRange,
         [
-            'begin' => null,
+            'begin' => '',
             'end' => '23456789'
         ]);
     }
