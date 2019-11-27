@@ -9,7 +9,9 @@ class RangeValidator
 {
 
     public function checkAll(Array $ranges) {
-        $invalidRanges = collect();
+        $nullRanges = [];
+        $beginBiggerRanges = [];
+        $overlappedRanges = [];
 
         foreach ($ranges as $range) {
             $invalidRange = $this->checkNullRanges($range);
@@ -33,28 +35,28 @@ class RangeValidator
             }
         }
 
-        if (isset($nullRanges) && count($nullRanges)) {
-            $invalidRanges->push([
+        if (count($nullRanges)) {
+            $invalidRanges[] = [
                 'message' => ExceptionConstants::NULL_MESSAGE_EXCEPTION,
                 'code' => ExceptionConstants::NULL_CODE_EXCEPTION,
-                'data' => $nullRanges
-            ]);
+                'ranges' => $nullRanges
+            ];
         }
 
-        if (isset($overlappedRanges) && count($overlappedRanges)) {
-            $invalidRanges->push([
+        if (count($overlappedRanges)) {
+            $invalidRanges[] = [
                 'message' => ExceptionConstants::OVERLAPPING_MESSAGE_EXCEPTION,
                 'code' => ExceptionConstants::OVERLAPPING_CODE_EXCEPTION,
-                'data' => $overlappedRanges
-            ]);
+                'ranges' => $overlappedRanges
+            ];
         }
 
-        if (isset($beginBiggerRanges) && count($beginBiggerRanges)) {
-            $invalidRanges->push([
+        if (count($beginBiggerRanges)) {
+            $invalidRanges[] = [
                 'message' => ExceptionConstants::BEGIN_BIGGER_THAN_END_MESSAGE_EXCEPTION,
                 'code' => ExceptionConstants::BEGIN_BIGGER_THAN_END_CODE_EXCEPTION,
-                'data' => $beginBiggerRanges
-            ]);
+                'ranges' => $beginBiggerRanges
+            ];
         }
 
         return $invalidRanges;
