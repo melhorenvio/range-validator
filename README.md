@@ -17,8 +17,34 @@ composer require melhorenvio/range-validator
 
 ## Usage
 
+First you need to instantiate a variable of the RangeValidator type.
 ``` php
-// Usage description here
+$rangeValidator = new RangeValidator();
+```
+
+You will need to set the RangeValidator dependencie
+``` php
+use Melhorenvio\RangeValidator\RangeValidator;
+```
+
+The checkEmpty() function returns the ranges with empty values.
+``` php
+$rangeValidator->checkEmpty($ranges);
+```
+
+The checkBegginBiggerThanEnd() function returns the ranges with the begin value bigger than the end value.
+``` php
+$rangeValidator->checkBegginBiggerThanEnd($ranges);
+```
+
+The checkOverlapping() function returns the ranges that are overlapping others ranges.
+``` php
+$rangeValidator->checkOverlapping($ranges);
+```
+
+The validate() function returns what the 3 others functions return.
+``` php
+$rangeValidator->validate($ranges);
 ```
 
 ### Testing

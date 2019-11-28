@@ -7,19 +7,19 @@ use Melhorenvio\RangeValidator\MessageConstants;
 
 class RangeValidator
 {
-    public function getEmptyRanges(Array $ranges) {
+    public function checkEmpty(Array $ranges) {
         return $this->getAllInvalidRanges($ranges, MessageConstants::EMPTY_CODE_EXCEPTION);
     }
 
-    public function getOverlappedRanges(Array $ranges) {
+    public function checkOverlapping(Array $ranges) {
         return $this->getAllInvalidRanges($ranges, MessageConstants::OVERLAPPING_CODE_EXCEPTION);
     }
 
-    public function getBeginBiggerRanges(Array $ranges) {
+    public function checkBeginBiggerThanEnd(Array $ranges) {
         return $this->getAllInvalidRanges($ranges, MessageConstants::BEGIN_BIGGER_THAN_END_CODE_EXCEPTION);
     }
 
-    public function getAllInvalidRanges(Array $ranges, $type = null) {
+    public function validate(Array $ranges, $type = null) {
         if (!count($ranges)) {
             return [
                 'message' => MessageConstants::EMPTY_PARAMETER_MESSAGE_EXCEPTION,
@@ -101,7 +101,7 @@ class RangeValidator
         ];
     }
 
-    public function emptyValue(Array $range) {
+    private function emptyValue(Array $range) {
         if(!empty($range['begin']) && !empty($range['end'])) {
             return null;
         }
@@ -109,7 +109,7 @@ class RangeValidator
         return $range;
     }
 
-    public function overlapping(Array $range, Array $ranges)
+    private function overlapping(Array $range, Array $ranges)
     {
         $ranges = collect($ranges);
 
@@ -120,7 +120,7 @@ class RangeValidator
         return $range;
     }
 
-    public function beginBiggerThanEnd(Array $range) {
+    private function beginBiggerThanEnd(Array $range) {
         if($range['begin'] <= $range['end']) {
             return null;
         }
