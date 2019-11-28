@@ -5,7 +5,7 @@
 [![Quality Score](https://img.shields.io/scrutinizer/g/melhorenvio/range-validator.svg?style=flat-square)](https://scrutinizer-ci.com/g/melhorenvio/range-validator)
 [![Total Downloads](https://img.shields.io/packagist/dt/melhorenvio/range-validator.svg?style=flat-square)](https://packagist.org/packages/melhorenvio/range-validator)
 
-This is where your description should go. Try and limit it to a paragraph or two, and maybe throw in a mention of what PSRs you support to avoid any confusion with users and contributors.
+This package has the objective of validate an array of ranges passed as function's parameter and return the invalid ranges with a message and code of the respective error. However, if there isn't problems with the ranges passed, the function will return a success message.
 
 ## Installation
 
@@ -22,10 +22,19 @@ First you need to instantiate a variable of the RangeValidator type.
 $rangeValidator = new RangeValidator();
 ```
 
-You will need to set the RangeValidator dependencie
+You will need to set the RangeValidator dependencie.
 ``` php
 use Melhorenvio\RangeValidator\RangeValidator;
 ```
+
+The RangeValidator functions accept a parameter, this paramater must be an array in the format showed below.
+``` php
+$ranges = [
+    'begin' => '12345678',
+    'end' => '87654321'
+];
+```
+The "begin" and "end" values must be of the String type, otherwise will be showed an error message instead the invalid ranges.
 
 The checkEmpty() function returns the ranges with empty values.
 ``` php
@@ -47,7 +56,16 @@ The validate() function returns what the 3 others functions return.
 $rangeValidator->validate($ranges);
 ```
 
-### Testing
+The return of the functions will be an array white a "message", "code" and, if it has, a "data" attribute as showed below.
+``` php
+[
+    'message' => String,
+    'code' => Int,
+    'data' => Array
+]
+```
+
+<!-- ### Testing
 
 ``` bash
 composer test
@@ -76,4 +94,4 @@ The MIT License (MIT). Please see [License File](LICENSE.md) for more informatio
 
 ## Laravel Package Boilerplate
 
-This package was generated using the [Laravel Package Boilerplate](https://laravelpackageboilerplate.com).
+This package was generated using the [Laravel Package Boilerplate](https://laravelpackageboilerplate.com). -->
