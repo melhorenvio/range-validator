@@ -1,4 +1,4 @@
-# Very short description of the package
+# RangeValidator
 
 [![Latest Version on Packagist](https://img.shields.io/packagist/v/melhorenvio/range-validator.svg?style=flat-square)](https://packagist.org/packages/melhorenvio/range-validator)
 [![Build Status](https://img.shields.io/travis/melhorenvio/range-validator/master.svg?style=flat-square)](https://travis-ci.org/melhorenvio/range-validator)
