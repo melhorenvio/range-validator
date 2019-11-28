@@ -8,15 +8,15 @@ use Melhorenvio\RangeValidator\MessageConstants;
 class RangeValidator
 {
     public function checkEmpty(Array $ranges) {
-        return $this->getAllInvalidRanges($ranges, MessageConstants::EMPTY_CODE_EXCEPTION);
+        return $this->validate($ranges, MessageConstants::EMPTY_CODE_EXCEPTION);
     }
 
     public function checkOverlapping(Array $ranges) {
-        return $this->getAllInvalidRanges($ranges, MessageConstants::OVERLAPPING_CODE_EXCEPTION);
+        return $this->validate($ranges, MessageConstants::OVERLAPPING_CODE_EXCEPTION);
     }
 
     public function checkBeginBiggerThanEnd(Array $ranges) {
-        return $this->getAllInvalidRanges($ranges, MessageConstants::BEGIN_BIGGER_THAN_END_CODE_EXCEPTION);
+        return $this->validate($ranges, MessageConstants::BEGIN_BIGGER_THAN_END_CODE_EXCEPTION);
     }
 
     public function validate(Array $ranges, $type = null) {

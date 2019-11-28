@@ -35,7 +35,7 @@ class RangeValidatorTest extends TestCase
             ]
         ];
 
-        $invalidRanges = $rangeValidator->getAllInvalidRanges($ranges);
+        $invalidRanges = $rangeValidator->validate($ranges);
 
         $this->assertEquals($invalidRanges,[
             [
@@ -107,7 +107,7 @@ class RangeValidatorTest extends TestCase
             ]
         ];
 
-        $invalidRanges = $rangeValidator->getemptyRanges($ranges);
+        $invalidRanges = $rangeValidator->checkEmpty($ranges);
 
         $this->assertEquals($invalidRanges,[
             [
@@ -151,7 +151,7 @@ class RangeValidatorTest extends TestCase
             ]
         ];
 
-        $invalidRanges = $rangeValidator->getOverlappedRanges($ranges);
+        $invalidRanges = $rangeValidator->checkOverlapping($ranges);
 
         $this->assertEquals($invalidRanges,[
             [
@@ -203,7 +203,7 @@ class RangeValidatorTest extends TestCase
             ]
         ];
 
-        $invalidRanges = $rangeValidator->getBeginBiggerRanges($ranges);
+        $invalidRanges = $rangeValidator->checkBeginBiggerThanEnd($ranges);
 
         $this->assertEquals($invalidRanges,[
             [
@@ -216,82 +216,6 @@ class RangeValidatorTest extends TestCase
                     ]
                 ]
             ]
-        ]);
-    }
-
-    /** @test */
-    public function it_validates_empty_value()
-    {
-        $rangeValidator = new RangeValidator();
-
-        $ranges = [
-                'begin' => '',
-                'end' => '23456789'
-            ];
-
-        $invalidRange = $rangeValidator->emptyValue($ranges);
-
-        $this->assertEquals($invalidRange,
-        [
-            'begin' => '',
-            'end' => '23456789'
-        ]);
-    }
-
-    /** @test */
-    public function it_validates_overlapping()
-    {
-        $rangeValidator = new RangeValidator();
-
-        $ranges = [
-            [
-                'begin' => '1',
-                'end' => '2'
-            ],
-            [
-                'begin' => '3',
-                'end' => '8'
-            ],
-            [
-                'begin' => '4',
-                'end' => '5'
-            ],
-            [
-                'begin' => '9',
-                'end' => '10'
-            ]
-        ];
-
-        $range = [
-            'begin' => '3',
-            'end' => '8'
-        ];
-
-        $invalidRange = $rangeValidator->overlapping($range, $ranges);
-
-        $this->assertEquals($invalidRange,
-        [
-            'begin' => '3',
-            'end' => '8'
-        ]);
-    }
-
-    /** @test */
-    public function it_validates_begin_bigger_than_end()
-    {
-        $rangeValidator = new RangeValidator();
-
-        $ranges = [
-            'begin' => '34567890',
-            'end' => '23456789'
-        ];
-
-        $invalidRange = $rangeValidator->beginBiggerThanEnd($ranges);
-
-        $this->assertEquals($invalidRange,
-        [
-            'begin' => '34567890',
-            'end' => '23456789'
         ]);
     }
 }
