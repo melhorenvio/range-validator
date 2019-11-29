@@ -129,11 +129,11 @@ class RangeValidator
     }
 
     private function getOverlappedRangesCollection(Collection $ranges, Array $range) {
-        $overlappedRanges = $ranges->whereBetween('begin', $range);
+        $overlappedRanges = $ranges->where('begin','>=', $range['begin'])->where('begin','<=', $range['end']);
 
         $overlappedRanges = $ranges->where('begin', '<=', $range['begin'])->where('end', '>=', $range['end']);
 
-        return $overlappedRanges->merge($ranges->whereBetween('end', $range))->unique();
+        return $overlappedRanges->merge($ranges->where('end','>=', $range['begin'])->where('end','<=', $range['end']))->unique();
     }
 
     private function validateParameter($range)
