@@ -21,10 +21,10 @@ class RangeValidator
 
     public function validate(Array $ranges, $type = null) {
         if (!count($ranges)) {
-            return [
+            return [[
                 'message' => MessageConstants::EMPTY_PARAMETER_MESSAGE_EXCEPTION,
                 'code' => MessageConstants::EMPTY_PARAMETER_CODE_EXCEPTION
-            ];
+            ]];
         }
 
         $emptyRanges = [];
@@ -60,11 +60,11 @@ class RangeValidator
         }
 
         if (count($invalidParameters)) {
-            return [
+            return [[
                 'message' => MessageConstants::INVALID_PARAMETER_MESSAGE_EXCEPTION,
                 'code' => MessageConstants::INVALID_PARAMETER_CODE_EXCEPTION,
                 'data' => $invalidParameters
-            ];
+            ]];
         }
 
         if (count($emptyRanges) && (empty($type) || $type === MessageConstants::EMPTY_CODE_EXCEPTION)) {
@@ -95,10 +95,10 @@ class RangeValidator
             return $invalidRanges;
         }
 
-        return [
+        return [[
             'message' => MessageConstants::SUCCESS_MESSAGE,
             'code' => MessageConstants::SUCCESS_CODE
-        ];
+        ]];
     }
 
     private function emptyValue(Array $range) {
