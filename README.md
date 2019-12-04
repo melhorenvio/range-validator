@@ -41,7 +41,7 @@ The checkEmpty() function returns the ranges with empty values.
 $rangeValidator->checkEmpty($ranges);
 ```
 
-The checkBegginBigerThanEnd() function returns the ranges with the begin value bigger than the end value.
+The checkBeginBiggerThanEnd() function returns the ranges with the begin value bigger than the end value.
 ``` php
 $rangeValidator->checkBeginBiggerThanEnd($ranges);
 ```
