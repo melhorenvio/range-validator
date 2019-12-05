@@ -5,7 +5,7 @@
 [![Quality Score](https://img.shields.io/scrutinizer/g/melhorenvio/range-validator.svg?style=flat-square)](https://scrutinizer-ci.com/g/melhorenvio/range-validator)
 [![Total Downloads](https://img.shields.io/packagist/dt/melhorenvio/range-validator.svg?style=flat-square)](https://packagist.org/packages/melhorenvio/range-validator)
 
-This package has the objective of validate an array of ranges passed as function's parameter and return the invalid ranges with a message and code of the respective error. However, if there isn't problems with the ranges passed, the function will return a success message.
+This package has the objective of validate an array of ranges passed and define the invalid ranges with a message and code of the respective error. However, if there isn't problems with the ranges passed, the method will define a success message.
 
 ## Installation
 
@@ -27,7 +27,7 @@ You will need to set the RangeValidator dependencie.
 use Melhorenvio\RangeValidator\RangeValidator;
 ```
 
-The RangeValidator functions accept a parameter, this paramater must be an array in the format showed below.
+The setRanges() and addRanges() methods accept a parameter, this paramater must be an array in the format showed below.
 ``` php
 $ranges = [
     'begin' => '12345678',
@@ -36,27 +36,47 @@ $ranges = [
 ```
 The "begin" and "end" values must be of the String type, otherwise will be showed an error message instead the invalid ranges.
 
-The checkEmpty() function returns the ranges with empty values.
+The setRanges() method will define the ranges with the value passed as parameter, it will overwrite others already setted ranges.
 ``` php
-$rangeValidator->checkEmpty($ranges);
+$rangeValidator->setRanges($range);
 ```
 
-The checkBeginBiggerThanEnd() function returns the ranges with the begin value bigger than the end value.
+The addRanges() method do the same as the setRanges() function, but it wont overwrite others already setted ranges.
 ``` php
-$rangeValidator->checkBeginBiggerThanEnd($ranges);
+$rangeValidator->addRanges($range);
 ```
 
-The checkOverlapping() function returns the ranges that are overlapping others ranges.
+The checkEmpty() method set the response with the ranges with empty values.
 ``` php
-$rangeValidator->checkOverlapping($ranges);
+$rangeValidator->checkEmpty();
 ```
 
-The validate() function returns what the 3 others functions return.
+The checkBeginBiggerThanEnd() method set the response with the ranges with begin value bigger than the end value.
 ``` php
-$rangeValidator->validate($ranges);
+$rangeValidator->checkBeginBiggerThanEnd();
 ```
 
-The return of the functions will be an array white a "message", "code" and, if it has, a "data" attribute as showed below.
+The checkOverlapping() method set the response with the ranges that are overlapping others ranges.
+``` php
+$rangeValidator->checkOverlapping();
+```
+
+The validate() method do all the 3 others methods do.
+``` php
+$rangeValidator->validate();
+```
+
+The getResponse() method will return the response attribute in array form.
+``` php
+$rangeValidator->getResponse();
+```
+
+The getRanges() method will return the ranges attribute in array form.
+``` php
+$rangeValidator->getRanges();
+```
+
+The response attribute will be an array of arrays with a "message", "code" and, if it has, a "data" attribute as showed below.
 ``` php
 [
     'message' => String,
@@ -64,3 +84,5 @@ The return of the functions will be an array white a "message", "code" and, if i
     'data' => Array
 ]
 ```
+
+If the getResponse() or getResponse() methods not be used, so the methods will return an object instance with ranges and response attributes.
