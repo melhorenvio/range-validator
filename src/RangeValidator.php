@@ -87,40 +87,40 @@ class RangeValidator
                 continue;
             }
 
-            if ($invalidRange = $this->repeated($range)) {
+            if ($invalidRange = $this->repeated($range) && (empty($type) || $type === MessageConstants::REPEATED_CODE_EXCEPTION)) {
                 $validateds->push([
                     'code' => MessageConstants::REPEATED_CODE_EXCEPTION,
                     'range' => $invalidRange
                 ]);
                 Cache::forever($key, $validateds->last());
-                continue;
+                // continue;
             }
 
-            if ($invalidRange = $this->emptyValue($range)) {
+            if ($invalidRange = $this->emptyValue($range) && (empty($type) || $type === MessageConstants::EMPTY_CODE_EXCEPTION)) {
                 $validateds->push([
                     'code' => MessageConstants::EMPTY_CODE_EXCEPTION,
                     'range' => $invalidRange
                 ]);
                 Cache::forever($key, $validateds->last());
-                continue;
+                // continue;
             }
 
-            if ($invalidRange = $this->beginBiggerThanEnd($range)) {
+            if ($invalidRange = $this->beginBiggerThanEnd($range) && (empty($type) || $type === MessageConstants::BEGIN_BIGGER_THAN_END_CODE_EXCEPTION)) {
                 $validateds->push([
                     'code' => MessageConstants::BEGIN_BIGGER_THAN_END_CODE_EXCEPTION,
                     'range' => $invalidRange
                 ]);
                 Cache::forever($key, $validateds->last());
-                continue;
+                // continue;
             }
 
-            if ($invalidRange = $this->overlapping($range)) {
+            if ($invalidRange = $this->overlapping($range) && (empty($type) || $type === MessageConstants::OVERLAPPING_CODE_EXCEPTION)) {
                 $validateds->push([
                     'code' => MessageConstants::OVERLAPPING_CODE_EXCEPTION,
                     'range' => $invalidRange
                 ]);
                 Cache::forever($key, $validateds->last());
-                continue;
+                // continue;
             }
 
             if (empty($invalidRange)) {
@@ -234,7 +234,7 @@ class RangeValidator
 
         $overlappedRanges = $ranges->where('begin','>=', $range['begin'])->where('begin','<=', $range['end']);
 
-        $overlappedRanges = $ranges->where('begin', '<=', $range['begin'])->where('end', '>=', $range['end']);
+        $overlappedRanges->merge($ranges->where('begin', '<=', $range['begin'])->where('end', '>=', $range['end']));
 
         return $overlappedRanges->merge($ranges->where('end','>=', $range['begin'])->where('end','<=', $range['end']))->unique();
     }
