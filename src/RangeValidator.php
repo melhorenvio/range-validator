@@ -2,6 +2,8 @@
 
 namespace Melhorenvio\RangeValidator;
 
+
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Collection;
 use Melhorenvio\RangeValidator\MessageConstants;
 
@@ -37,6 +39,11 @@ class RangeValidator
         return $this;
     }
 
+    public function checkRepeated()
+    {
+        return $this->validate(MessageConstants::REPEATED_CODE_EXCEPTION);
+    }
+
     public function checkEmpty()
     {
         return $this->validate(MessageConstants::EMPTY_CODE_EXCEPTION);
@@ -62,75 +69,118 @@ class RangeValidator
             return $this;
         }
 
-        $emptyRanges = [];
-        $beginBiggerRanges = [];
-        $overlappedRanges = [];
-        $invalidParameters = [];
-        $hasInvalidRanges = false;
+        $validateds = collect();
 
         foreach ($this->ranges as $range) {
+            $invalidRange = null;
+            $key = $range['begin'] . $range['end'];
+
+            if ($cachedRange = Cache::get($key, false)) {
+                continue;
+            }
+
             if (!$this->validateParameter($range)) {
-                $invalidParameters[] = $range;
+                $validateds->push([
+                    'code' => MessageConstants::INVALID_PARAMETER_CODE_EXCEPTION,
+                    'range' => $range
+                ]);
                 continue;
             }
 
-            $invalidRange = $this->emptyValue($range);
-
-            if (!empty($invalidRange)) {
-                $emptyRanges[] = $invalidRange;
+            if ($invalidRange = $this->repeated($range)) {
+                $validateds->push([
+                    'code' => MessageConstants::REPEATED_CODE_EXCEPTION,
+                    'range' => $invalidRange
+                ]);
+                Cache::forever($key, $validateds->last());
                 continue;
             }
 
-            $invalidRange = $this->beginBiggerThanEnd($range);
-
-            if (!empty($invalidRange)) {
-                $beginBiggerRanges[] = $invalidRange;
+            if ($invalidRange = $this->emptyValue($range)) {
+                $validateds->push([
+                    'code' => MessageConstants::EMPTY_CODE_EXCEPTION,
+                    'range' => $invalidRange
+                ]);
+                Cache::forever($key, $validateds->last());
+                continue;
             }
 
-            $invalidRange = $this->overlapping($range);
+            if ($invalidRange = $this->beginBiggerThanEnd($range)) {
+                $validateds->push([
+                    'code' => MessageConstants::BEGIN_BIGGER_THAN_END_CODE_EXCEPTION,
+                    'range' => $invalidRange
+                ]);
+                Cache::forever($key, $validateds->last());
+                continue;
+            }
 
-            if (!empty($invalidRange)) {
-                $overlappedRanges[] = $invalidRange;
+            if ($invalidRange = $this->overlapping($range)) {
+                $validateds->push([
+                    'code' => MessageConstants::OVERLAPPING_CODE_EXCEPTION,
+                    'range' => $invalidRange
+                ]);
+                Cache::forever($key, $validateds->last());
+                continue;
+            }
+
+            if (empty($invalidRange)) {
+                $validateds->push([
+                    'code' => MessageConstants::SUCCESS_CODE,
+                    'range' => $range
+                ]);
+                Cache::forever($key, $validateds->last());
+                continue;
             }
         }
+        Cache::flush();
+        $repeated = $validateds->where('code', MessageConstants::REPEATED_CODE_EXCEPTION)->pluck('range')->toArray();
+        $empty = $validateds->where('code', MessageConstants::EMPTY_CODE_EXCEPTION)->pluck('range')->toArray();
+        $beginBigger = $validateds->where('code', MessageConstants::BEGIN_BIGGER_THAN_END_CODE_EXCEPTION)->pluck('range')->toArray();
+        $overlapping = $validateds->where('code', MessageConstants::OVERLAPPING_CODE_EXCEPTION)->pluck('range')->toArray();
+        $wrongParameter = $validateds->where('code', MessageConstants::INVALID_PARAMETER_CODE_EXCEPTION)->pluck('range')->toArray();
 
-        if (count($invalidParameters)) {
+        if (count($wrongParameter)) {
             $this->response[] = [
                 'message' => MessageConstants::INVALID_PARAMETER_MESSAGE_EXCEPTION,
                 'code' => MessageConstants::INVALID_PARAMETER_CODE_EXCEPTION,
-                'data' => $invalidParameters
+                'data' => $wrongParameter
             ];
             return $this;
         }
 
-        if (count($emptyRanges) && (empty($type) || $type === MessageConstants::EMPTY_CODE_EXCEPTION)) {
+        if (count($repeated) && (empty($type) || $type === MessageConstants::REPEATED_CODE_EXCEPTION)) {
+            $this->response[] = [
+                'message' => MessageConstants::REPEATED_MESSAGE_EXCEPTION,
+                'code' => MessageConstants::REPEATED_CODE_EXCEPTION,
+                'data' => $repeated
+            ];
+        }
+
+        if (count($empty) && (empty($type) || $type === MessageConstants::EMPTY_CODE_EXCEPTION)) {
             $this->response[] = [
                 'message' => MessageConstants::EMPTY_MESSAGE_EXCEPTION,
                 'code' => MessageConstants::EMPTY_CODE_EXCEPTION,
-                'data' => $emptyRanges
+                'data' => $empty
             ];
-            $hasInvalidRanges = true;
         }
 
-        if (count($beginBiggerRanges) && (empty($type) || $type === MessageConstants::BEGIN_BIGGER_THAN_END_CODE_EXCEPTION)) {
+        if (count($beginBigger) && (empty($type) || $type === MessageConstants::BEGIN_BIGGER_THAN_END_CODE_EXCEPTION)) {
             $this->response[] = [
                 'message' => MessageConstants::BEGIN_BIGGER_THAN_END_MESSAGE_EXCEPTION,
                 'code' => MessageConstants::BEGIN_BIGGER_THAN_END_CODE_EXCEPTION,
-                'data' => $beginBiggerRanges
+                'data' => $beginBigger
             ];
-            $hasInvalidRanges = true;
         }
 
-        if (count($overlappedRanges) && (empty($type) || $type === MessageConstants::OVERLAPPING_CODE_EXCEPTION)) {
+        if (count($overlapping) && (empty($type) || $type === MessageConstants::OVERLAPPING_CODE_EXCEPTION)) {
             $this->response[] = [
                 'message' => MessageConstants::OVERLAPPING_MESSAGE_EXCEPTION,
                 'code' => MessageConstants::OVERLAPPING_CODE_EXCEPTION,
-                'data' => $overlappedRanges
+                'data' => $overlapping
             ];
-            $hasInvalidRanges = true;
         }
 
-        if (!$hasInvalidRanges) {
+        if (!count($validateds->where('code','!=',MessageConstants::SUCCESS_CODE))) {
             $this->response[] = [
                 'message' => MessageConstants::SUCCESS_MESSAGE,
                 'code' => MessageConstants::SUCCESS_CODE
@@ -143,7 +193,7 @@ class RangeValidator
     private function emptyValue(Array $range)
     {
         if(!empty($range['begin']) && !empty($range['end'])) {
-            return null;
+            return false;
         }
 
         return $range;
@@ -152,7 +202,7 @@ class RangeValidator
     private function overlapping(Array $range)
     {
         if (count($this->getOverlappedRangesCollection($range)) <= 1) {
-            return null;
+            return false;
         }
 
         return $range;
@@ -161,7 +211,18 @@ class RangeValidator
     private function beginBiggerThanEnd(Array $range)
     {
         if($range['begin'] <= $range['end']) {
-            return null;
+            return false;
+        }
+
+        return $range;
+    }
+
+    private function repeated(Array $range)
+    {
+        $ranges = collect($this->ranges);
+
+        if (count($ranges->where('begin', $range['begin'])->where('end', $range['end'])) <= 1) {
+            return false;
         }
 
         return $range;
