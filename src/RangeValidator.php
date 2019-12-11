@@ -87,7 +87,7 @@ class RangeValidator
                 continue;
             }
 
-            if ($invalidRange = $this->repeated($range) && (empty($type) || $type === MessageConstants::REPEATED_CODE_EXCEPTION)) {
+            if (($invalidRange = $this->repeated($range)) && (empty($type) || $type === MessageConstants::REPEATED_CODE_EXCEPTION)) {
                 $validateds->push([
                     'code' => MessageConstants::REPEATED_CODE_EXCEPTION,
                     'range' => $invalidRange
@@ -96,7 +96,7 @@ class RangeValidator
                 // continue;
             }
 
-            if ($invalidRange = $this->emptyValue($range) && (empty($type) || $type === MessageConstants::EMPTY_CODE_EXCEPTION)) {
+            if (($invalidRange = $this->emptyValue($range)) && (empty($type) || $type === MessageConstants::EMPTY_CODE_EXCEPTION)) {
                 $validateds->push([
                     'code' => MessageConstants::EMPTY_CODE_EXCEPTION,
                     'range' => $invalidRange
@@ -105,7 +105,7 @@ class RangeValidator
                 // continue;
             }
 
-            if ($invalidRange = $this->beginBiggerThanEnd($range) && (empty($type) || $type === MessageConstants::BEGIN_BIGGER_THAN_END_CODE_EXCEPTION)) {
+            if (($invalidRange = $this->beginBiggerThanEnd($range)) && (empty($type) || $type === MessageConstants::BEGIN_BIGGER_THAN_END_CODE_EXCEPTION)) {
                 $validateds->push([
                     'code' => MessageConstants::BEGIN_BIGGER_THAN_END_CODE_EXCEPTION,
                     'range' => $invalidRange
@@ -114,7 +114,7 @@ class RangeValidator
                 // continue;
             }
 
-            if ($invalidRange = $this->overlapping($range) && (empty($type) || $type === MessageConstants::OVERLAPPING_CODE_EXCEPTION)) {
+            if (($invalidRange = $this->overlapping($range)) && (empty($type) || $type === MessageConstants::OVERLAPPING_CODE_EXCEPTION)) {
                 $validateds->push([
                     'code' => MessageConstants::OVERLAPPING_CODE_EXCEPTION,
                     'range' => $invalidRange
@@ -193,7 +193,7 @@ class RangeValidator
     private function emptyValue(Array $range)
     {
         if(!empty($range['begin']) && !empty($range['end'])) {
-            return false;
+            return null;
         }
 
         return $range;
@@ -202,7 +202,7 @@ class RangeValidator
     private function overlapping(Array $range)
     {
         if (count($this->getOverlappedRangesCollection($range)) <= 1) {
-            return false;
+            return null;
         }
 
         return $range;
@@ -211,7 +211,7 @@ class RangeValidator
     private function beginBiggerThanEnd(Array $range)
     {
         if($range['begin'] <= $range['end']) {
-            return false;
+            return null;
         }
 
         return $range;
@@ -222,7 +222,7 @@ class RangeValidator
         $ranges = collect($this->ranges);
 
         if (count($ranges->where('begin', $range['begin'])->where('end', $range['end'])) <= 1) {
-            return false;
+            return null;
         }
 
         return $range;
