@@ -234,9 +234,9 @@ class RangeValidator
 
         $overlappedRanges = $ranges->where('begin','>=', $range['begin'])->where('begin','<=', $range['end']);
 
-        $overlappedRanges->merge($ranges->where('begin', '<=', $range['begin'])->where('end', '>=', $range['end']));
+        $overlappedRanges->merge($ranges->where('end','>=', $range['begin'])->where('end','<=', $range['end']));
 
-        return $overlappedRanges->merge($ranges->where('end','>=', $range['begin'])->where('end','<=', $range['end']))->unique();
+        return $overlappedRanges->merge($ranges->where('begin', '<=', $range['begin'])->where('end', '>=', $range['end']))->unique();
     }
 
     private function validateParameter($range)
