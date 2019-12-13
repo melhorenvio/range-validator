@@ -72,18 +72,18 @@ class RangeValidator
         $validateds = collect();
 
         foreach ($this->ranges as $range) {
-            $invalidRange = null;
-            $key = $range['begin'] . $range['end'];
-
-            if ($cachedRange = Cache::get($key, false)) {
-                continue;
-            }
-
             if (!$this->validateParameter($range)) {
                 $validateds->push([
                     'code' => MessageConstants::INVALID_PARAMETER_CODE_EXCEPTION,
                     'range' => $range
                 ]);
+                continue;
+            }
+
+            $invalidRange = null;
+            $key = $range['begin'] . $range['end'];
+
+            if ($cachedRange = Cache::get($key, false)) {
                 continue;
             }
 
