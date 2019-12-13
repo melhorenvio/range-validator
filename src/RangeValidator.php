@@ -260,6 +260,10 @@ class RangeValidator
             return false;
         }
 
+        if(!is_numeric($range['begin']) || !is_numeric($range['begin'])) {
+            return false;
+        }
+
         return true;
     }
 }
