@@ -145,7 +145,6 @@ class RangeValidator
                 'code' => MessageConstants::INVALID_PARAMETER_CODE_EXCEPTION,
                 'data' => $wrongParameter
             ];
-            return $this;
         }
 
         if (count($repeated) && (empty($type) || $type === MessageConstants::REPEATED_CODE_EXCEPTION)) {
