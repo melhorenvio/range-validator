@@ -11,6 +11,8 @@ class RangeValidator
 {
     protected $ranges = [];
 
+    protected $parameters = [];
+
     protected $response = [];
 
     public function getResponse()
@@ -41,25 +43,29 @@ class RangeValidator
 
     public function checkRepeated()
     {
-        return $this->validate(MessageConstants::REPEATED_CODE_EXCEPTION);
+        $this->parameters[] = MessageConstants::REPEATED_CODE_EXCEPTION;
+        return $this;
     }
 
     public function checkEmpty()
     {
-        return $this->validate(MessageConstants::EMPTY_CODE_EXCEPTION);
+        $this->parameters[] = MessageConstants::EMPTY_CODE_EXCEPTION;
+        return $this;
     }
 
     public function checkOverlapping()
     {
-        return $this->validate(MessageConstants::OVERLAPPING_CODE_EXCEPTION);
+        $this->parameters[] = MessageConstants::OVERLAPPING_CODE_EXCEPTION;
+        return $this;
     }
 
     public function checkBeginBiggerThanEnd()
     {
-        return $this->validate(MessageConstants::BEGIN_BIGGER_THAN_END_CODE_EXCEPTION);
+        $this->parameters[] = MessageConstants::BEGIN_BIGGER_THAN_END_CODE_EXCEPTION;
+        return $this;
     }
 
-    public function validate($type = null)
+    public function validate()
     {
         if (!count($this->ranges)) {
             $this->response[] = [
@@ -87,7 +93,7 @@ class RangeValidator
                 continue;
             }
 
-            if (($invalidRange = $this->repeated($range)) && (empty($type) || $type === MessageConstants::REPEATED_CODE_EXCEPTION)) {
+            if (($invalidRange = $this->repeated($range)) && (empty($this->parameters) || in_array(MessageConstants::REPEATED_CODE_EXCEPTION, $this->parameters))) {
                 $validateds->push([
                     'code' => MessageConstants::REPEATED_CODE_EXCEPTION,
                     'range' => $invalidRange
@@ -96,7 +102,7 @@ class RangeValidator
                 // continue;
             }
 
-            if (($invalidRange = $this->emptyValue($range)) && (empty($type) || $type === MessageConstants::EMPTY_CODE_EXCEPTION)) {
+            if (($invalidRange = $this->emptyValue($range)) && (empty($this->parameters) || in_array(MessageConstants::EMPTY_CODE_EXCEPTION, $this->parameters))) {
                 $validateds->push([
                     'code' => MessageConstants::EMPTY_CODE_EXCEPTION,
                     'range' => $invalidRange
@@ -105,7 +111,7 @@ class RangeValidator
                 // continue;
             }
 
-            if (($invalidRange = $this->beginBiggerThanEnd($range)) && (empty($type) || $type === MessageConstants::BEGIN_BIGGER_THAN_END_CODE_EXCEPTION)) {
+            if (($invalidRange = $this->beginBiggerThanEnd($range)) && (empty($this->parameters) || in_array(MessageConstants::BEGIN_BIGGER_THAN_END_CODE_EXCEPTION, $this->parameters))) {
                 $validateds->push([
                     'code' => MessageConstants::BEGIN_BIGGER_THAN_END_CODE_EXCEPTION,
                     'range' => $invalidRange
@@ -114,7 +120,7 @@ class RangeValidator
                 // continue;
             }
 
-            if (($invalidRange = $this->overlapping($range)) && (empty($type) || $type === MessageConstants::OVERLAPPING_CODE_EXCEPTION)) {
+            if (($invalidRange = $this->overlapping($range)) && (empty($this->parameters) || in_array(MessageConstants::OVERLAPPING_CODE_EXCEPTION, $this->parameters))) {
                 $validateds->push([
                     'code' => MessageConstants::OVERLAPPING_CODE_EXCEPTION,
                     'range' => $invalidRange
@@ -147,7 +153,7 @@ class RangeValidator
             ];
         }
 
-        if (count($repeated) && (empty($type) || $type === MessageConstants::REPEATED_CODE_EXCEPTION)) {
+        if (count($repeated) && (empty($this->parameters) || in_array(MessageConstants::REPEATED_CODE_EXCEPTION, $this->parameters))) {
             $this->response[] = [
                 'message' => MessageConstants::REPEATED_MESSAGE_EXCEPTION,
                 'code' => MessageConstants::REPEATED_CODE_EXCEPTION,
@@ -155,7 +161,7 @@ class RangeValidator
             ];
         }
 
-        if (count($empty) && (empty($type) || $type === MessageConstants::EMPTY_CODE_EXCEPTION)) {
+        if (count($empty) && (empty($this->parameters) || in_array(MessageConstants::EMPTY_CODE_EXCEPTION, $this->parameters))) {
             $this->response[] = [
                 'message' => MessageConstants::EMPTY_MESSAGE_EXCEPTION,
                 'code' => MessageConstants::EMPTY_CODE_EXCEPTION,
@@ -163,7 +169,7 @@ class RangeValidator
             ];
         }
 
-        if (count($beginBigger) && (empty($type) || $type === MessageConstants::BEGIN_BIGGER_THAN_END_CODE_EXCEPTION)) {
+        if (count($beginBigger) && (empty($this->parameters) || in_array(MessageConstants::BEGIN_BIGGER_THAN_END_CODE_EXCEPTION, $this->parameters))) {
             $this->response[] = [
                 'message' => MessageConstants::BEGIN_BIGGER_THAN_END_MESSAGE_EXCEPTION,
                 'code' => MessageConstants::BEGIN_BIGGER_THAN_END_CODE_EXCEPTION,
@@ -171,7 +177,7 @@ class RangeValidator
             ];
         }
 
-        if (count($overlapping) && (empty($type) || $type === MessageConstants::OVERLAPPING_CODE_EXCEPTION)) {
+        if (count($overlapping) && (empty($this->parameters) || in_array(MessageConstants::OVERLAPPING_CODE_EXCEPTION, $this->parameters))) {
             $this->response[] = [
                 'message' => MessageConstants::OVERLAPPING_MESSAGE_EXCEPTION,
                 'code' => MessageConstants::OVERLAPPING_CODE_EXCEPTION,
