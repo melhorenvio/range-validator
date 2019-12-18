@@ -15,6 +15,8 @@ class RangeValidator
 
     protected $response = [];
 
+    protected $airport = false;
+
     public function getResponse()
     {
         return array_map(function ($value) {
@@ -65,6 +67,12 @@ class RangeValidator
         return $this;
     }
 
+    public function checkAirport()
+    {
+        $this->airport = true;
+        return $this;
+    }
+
     public function validate()
     {
         if (!count($this->ranges)) {
@@ -86,10 +94,10 @@ class RangeValidator
                 continue;
             }
 
-            $invalidRange = null;
+            $noError = true;
             $key = $range['begin'] . $range['end'];
 
-            if ($cachedRange = Cache::get($key, false)) {
+            if (Cache::get($key, false)) {
                 continue;
             }
 
@@ -98,8 +106,8 @@ class RangeValidator
                     'code' => MessageConstants::REPEATED_CODE_EXCEPTION,
                     'range' => $invalidRange
                 ]);
+                $noError = false;
                 Cache::forever($key, $validateds->last());
-                // continue;
             }
 
             if (($invalidRange = $this->emptyValue($range)) && (empty($this->parameters) || in_array(MessageConstants::EMPTY_CODE_EXCEPTION, $this->parameters))) {
@@ -107,8 +115,8 @@ class RangeValidator
                     'code' => MessageConstants::EMPTY_CODE_EXCEPTION,
                     'range' => $invalidRange
                 ]);
+                $noError = false;
                 Cache::forever($key, $validateds->last());
-                // continue;
             }
 
             if (($invalidRange = $this->beginBiggerThanEnd($range)) && (empty($this->parameters) || in_array(MessageConstants::BEGIN_BIGGER_THAN_END_CODE_EXCEPTION, $this->parameters))) {
@@ -116,8 +124,8 @@ class RangeValidator
                     'code' => MessageConstants::BEGIN_BIGGER_THAN_END_CODE_EXCEPTION,
                     'range' => $invalidRange
                 ]);
+                $noError = false;
                 Cache::forever($key, $validateds->last());
-                // continue;
             }
 
             if (($invalidRange = $this->overlapping($range)) && (empty($this->parameters) || in_array(MessageConstants::OVERLAPPING_CODE_EXCEPTION, $this->parameters))) {
@@ -125,17 +133,16 @@ class RangeValidator
                     'code' => MessageConstants::OVERLAPPING_CODE_EXCEPTION,
                     'range' => $invalidRange
                 ]);
+                $noError = false;
                 Cache::forever($key, $validateds->last());
-                // continue;
             }
 
-            if (empty($invalidRange)) {
+            if ($noError) {
                 $validateds->push([
                     'code' => MessageConstants::SUCCESS_CODE,
                     'range' => $range
                 ]);
                 Cache::forever($key, $validateds->last());
-                continue;
             }
         }
         Cache::flush();
@@ -198,7 +205,7 @@ class RangeValidator
     private function emptyValue(Array $range)
     {
         if(!empty($range['begin']) && !empty($range['end'])) {
-            return null;
+            return false;
         }
 
         return $range;
@@ -207,7 +214,7 @@ class RangeValidator
     private function overlapping(Array $range)
     {
         if (count($this->getOverlappedRangesCollection($range)) <= 1) {
-            return null;
+            return false;
         }
 
         return $range;
@@ -216,7 +223,7 @@ class RangeValidator
     private function beginBiggerThanEnd(Array $range)
     {
         if($range['begin'] <= $range['end']) {
-            return null;
+            return false;
         }
 
         return $range;
@@ -227,7 +234,7 @@ class RangeValidator
         $ranges = collect($this->ranges);
 
         if (count($ranges->where('begin', $range['begin'])->where('end', $range['end'])) <= 1) {
-            return null;
+            return false;
         }
 
         return $range;
@@ -237,11 +244,19 @@ class RangeValidator
     {
         $ranges = collect($this->ranges);
 
-        $overlappedRanges = $ranges->where('begin','>=', $range['begin'])->where('begin','<=', $range['end']);
+        $overlappedRanges = $ranges->where('begin','>=', $range['begin'])->where('begin','<=', $range['end'])->when($this->airport, function($ranges) use ($range) {
+            return $ranges->where('airport', '!=', $range['airport'])->push($range);
+        });
 
-        $overlappedRanges->merge($ranges->where('end','>=', $range['begin'])->where('end','<=', $range['end']));
+        $overlappedRanges = $overlappedRanges->merge($ranges->where('end','>=', $range['begin'])->where('end','<=', $range['end']))->when($this->airport, function($ranges) use ($range) {
+            return $ranges->where('airport', '!=', $range['airport'])->push($range);
+        });
 
-        return $overlappedRanges->merge($ranges->where('begin', '<=', $range['begin'])->where('end', '>=', $range['end']))->unique();
+        $overlappedRanges = $overlappedRanges->merge($ranges->where('begin', '<=', $range['begin'])->where('end', '>=', $range['end']))->when($this->airport, function($ranges) use ($range) {
+            return $ranges->where('airport', '!=', $range['airport'])->push($range);
+        })->unique();
+
+        return $overlappedRanges;
     }
 
     private function validateParameter($range)
@@ -266,7 +281,19 @@ class RangeValidator
             return false;
         }
 
-        if(!is_numeric($range['begin']) || !is_numeric($range['begin'])) {
+        if(!is_numeric($range['begin']) || !is_numeric($range['end'])) {
+            return false;
+        }
+
+        if (!$this->airport) {
+            return true;
+        }
+
+        if (!isset($range['airport'])) {
+            return false;
+        }
+
+        if (gettype($range['airport']) != 'string') {
             return false;
         }
 
