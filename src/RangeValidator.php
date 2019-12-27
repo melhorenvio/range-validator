@@ -67,7 +67,7 @@ class RangeValidator
         return $this;
     }
 
-    public function checkAirport()
+    public function useAirport()
     {
         $this->airport = true;
         return $this;

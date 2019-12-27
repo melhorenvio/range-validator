@@ -66,11 +66,11 @@ The checkOverlapping() method set the response with the ranges that are overlapp
 $rangeValidator->checkOverlapping();
 ```
 
-The checkAirport() method will make the validator consider whether the ranges are of the same airport when looking for overlapping. If the ranges are of the same airport, the validator will disconsider the overlapping.
+The useAirport() method will make the validator consider whether the ranges are of the same airport when looking for overlapping. If the ranges are of the same airport, the validator will disconsider the overlapping.
 ``` php
-$rangeValidator->checkAirport();
+$rangeValidator->useAirport();
 ```
-In this case, if the checkAirport method is enable, the setRanges() and addRanges()'s parameters will change, because the string parameter 'airport' will be added. So the array's format will be like showed below.
+In this case, if the useAirport method is enable, the setRanges() and addRanges()'s parameters will change, because the string parameter 'airport' will be added. So the array's format will be like showed below.
 ``` php
 $ranges = [
     'begin' => '12345678',
@@ -79,7 +79,7 @@ $ranges = [
 ];
 ```
 
-The validate() method will really validate the ranges and return the response, without this method the validation won't work.
+The validate() method will really validate the ranges and return the response, without this method the validation won't work. If you set one of the check methods above, the validator will consider just the setted attributes, if you don't set anyone of them so the validator will consider all attributes.
 ``` php
 $rangeValidator->validate();
 ```
