@@ -56,12 +56,30 @@ The checkBeginBiggerThanEnd() method set the response with the ranges with begin
 $rangeValidator->checkBeginBiggerThanEnd();
 ```
 
+The checkRepeated() method set the response with the ranges that are fond more than just one time.
+``` php
+$rangeValidator->checkRepeated();
+```
+
 The checkOverlapping() method set the response with the ranges that are overlapping others ranges.
 ``` php
 $rangeValidator->checkOverlapping();
 ```
 
-The validate() method do all the 3 others methods do.
+The checkAirport() method will make the validator consider whether the ranges are of the same airport when looking for overlapping. If the ranges are of the same airport, the validator will disconsider the overlapping.
+``` php
+$rangeValidator->checkAirport();
+```
+In this case, if the checkAirport method is enable, the setRanges() and addRanges()'s parameters will change, because the string parameter 'airport' will be added. So the array's format will be like showed below.
+``` php
+$ranges = [
+    'begin' => '12345678',
+    'end' => '87654321',
+    'airport' => 'AirportOne'
+];
+```
+
+The validate() method will really validate the ranges and return the response, without this method the validation won't work.
 ``` php
 $rangeValidator->validate();
 ```
@@ -85,4 +103,4 @@ The response attribute will be an array of arrays with a "message", "code" and, 
 ]
 ```
 
-If the getResponse() or getResponse() methods not be used, so the methods will return an object instance with ranges and response attributes.
+If the getResponse() or getResponse() methods not be used, so the methods will return an object instance of the RangeValidator.
