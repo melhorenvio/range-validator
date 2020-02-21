@@ -269,7 +269,7 @@ class RangeValidator
             return false;
         }
 
-        if (gettype($range['begin']) != 'string') {
+        if (gettype($range['begin']) != 'string' && gettype($range['begin']) != 'integer') {
             return false;
         }
 
@@ -277,7 +277,7 @@ class RangeValidator
             return false;
         }
 
-        if (gettype($range['end']) != 'string') {
+        if (gettype($range['end']) != 'string' && gettype($range['end']) != 'integer') {
             return false;
         }
 
