@@ -202,7 +202,7 @@ class RangeValidator
         return $this;
     }
 
-    private function emptyValue(Array $range)
+    public function emptyValue(Array $range)
     {
         if(!empty($range['begin']) && !empty($range['end'])) {
             return false;
@@ -211,7 +211,7 @@ class RangeValidator
         return $range;
     }
 
-    private function overlapping(Array $range)
+    public function overlapping(Array $range)
     {
         if (count($this->getOverlappedRangesCollection($range)) <= 1) {
             return false;
@@ -220,7 +220,7 @@ class RangeValidator
         return $range;
     }
 
-    private function beginBiggerThanEnd(Array $range)
+    public function beginBiggerThanEnd(Array $range)
     {
         if($range['begin'] <= $range['end']) {
             return false;
@@ -229,7 +229,7 @@ class RangeValidator
         return $range;
     }
 
-    private function repeated(Array $range)
+    public function repeated(Array $range)
     {
         $ranges = collect($this->ranges);
 
