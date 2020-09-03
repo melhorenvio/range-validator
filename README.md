@@ -34,7 +34,7 @@ $ranges = [
     'end' => '87654321'
 ];
 ```
-The "begin" and "end" values must be of the String type, otherwise will be showed an error message instead the invalid ranges.
+The "begin" and "end" values must be of the String or Integer type, otherwise will be showed an error message instead the invalid ranges.
 
 The setRanges() method will define the ranges with the value passed as parameter, it will overwrite others already setted ranges.
 ``` php
@@ -56,7 +56,7 @@ The checkBeginBiggerThanEnd() method set the response with the ranges with begin
 $rangeValidator->checkBeginBiggerThanEnd();
 ```
 
-The checkRepeated() method set the response with the ranges that are fond more than just one time.
+The checkRepeated() method set the response with the ranges that are found more than just one time.
 ``` php
 $rangeValidator->checkRepeated();
 ```
@@ -79,7 +79,7 @@ $ranges = [
 ];
 ```
 
-The validate() method will really validate the ranges and return the response, without this method the validation won't work. If you set one of the check methods above, the validator will consider just the setted attributes, if you don't set anyone of them so the validator will consider all attributes.
+The validate() method will really validate the ranges and return the response, without this method the validation won't work. If you set one or more of the check methods above, the validator will consider just the setted attributes, if you don't set anyone of them so the validator will consider all attributes.
 ``` php
 $rangeValidator->validate();
 ```
@@ -103,4 +103,4 @@ The response attribute will be an array of arrays with a "message", "code" and, 
 ]
 ```
 
-If the getResponse() or getResponse() methods not be used, so the methods will return an object instance of the RangeValidator.
+If the getResponse() or getRanges() methods not be used, so the methods will return an object instance of the RangeValidator.
