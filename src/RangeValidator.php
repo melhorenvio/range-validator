@@ -19,9 +19,13 @@ class RangeValidator
 
     public function getResponse()
     {
-        return array_map(function ($value) {
+        $response = array_map(function ($value) {
             return $value instanceof Arrayable ? $value->toArray() : $value;
         }, $this->response);
+
+        $this->response = [];
+
+        return $response;
     }
 
     public function getRanges()
@@ -31,13 +35,13 @@ class RangeValidator
         }, $this->ranges);
     }
 
-    public function setRanges(Array $ranges)
+    public function setRanges(array $ranges)
     {
         $this->ranges = $ranges;
         return $this;
     }
 
-    public function addRanges(Array $ranges)
+    public function addRanges(array $ranges)
     {
         $this->ranges = array_merge($this->ranges, $ranges);
         return $this;
@@ -192,7 +196,7 @@ class RangeValidator
             ];
         }
 
-        if (!count($validateds->where('code','!=',MessageConstants::SUCCESS_CODE))) {
+        if (!count($validateds->where('code', '!=', MessageConstants::SUCCESS_CODE))) {
             $this->response[] = [
                 'message' => MessageConstants::SUCCESS_MESSAGE,
                 'code' => MessageConstants::SUCCESS_CODE
@@ -202,16 +206,16 @@ class RangeValidator
         return $this;
     }
 
-    public function emptyValue(Array $range)
+    public function emptyValue(array $range)
     {
-        if(!empty($range['begin']) && !empty($range['end'])) {
+        if (!empty($range['begin']) && !empty($range['end'])) {
             return false;
         }
 
         return $range;
     }
 
-    public function overlapping(Array $range)
+    public function overlapping(array $range)
     {
         if (count($this->getOverlappedRangesCollection($range)) <= 1) {
             return false;
@@ -220,16 +224,16 @@ class RangeValidator
         return $range;
     }
 
-    public function beginBiggerThanEnd(Array $range)
+    public function beginBiggerThanEnd(array $range)
     {
-        if($range['begin'] <= $range['end']) {
+        if ($range['begin'] <= $range['end']) {
             return false;
         }
 
         return $range;
     }
 
-    public function repeated(Array $range)
+    public function repeated(array $range)
     {
         $ranges = collect($this->ranges);
 
@@ -240,19 +244,19 @@ class RangeValidator
         return $range;
     }
 
-    private function getOverlappedRangesCollection(Array $range)
+    private function getOverlappedRangesCollection(array $range)
     {
         $ranges = collect($this->ranges);
 
-        $overlappedRanges = $ranges->where('begin','>=', $range['begin'])->where('begin','<=', $range['end'])->when($this->airport, function($ranges) use ($range) {
+        $overlappedRanges = $ranges->where('begin', '>=', $range['begin'])->where('begin', '<=', $range['end'])->when($this->airport, function ($ranges) use ($range) {
             return $ranges->where('airport', '!=', $range['airport'])->push($range);
         });
 
-        $overlappedRanges = $overlappedRanges->merge($ranges->where('end','>=', $range['begin'])->where('end','<=', $range['end']))->when($this->airport, function($ranges) use ($range) {
+        $overlappedRanges = $overlappedRanges->merge($ranges->where('end', '>=', $range['begin'])->where('end', '<=', $range['end']))->when($this->airport, function ($ranges) use ($range) {
             return $ranges->where('airport', '!=', $range['airport'])->push($range);
         });
 
-        $overlappedRanges = $overlappedRanges->merge($ranges->where('begin', '<=', $range['begin'])->where('end', '>=', $range['end']))->when($this->airport, function($ranges) use ($range) {
+        $overlappedRanges = $overlappedRanges->merge($ranges->where('begin', '<=', $range['begin'])->where('end', '>=', $range['end']))->when($this->airport, function ($ranges) use ($range) {
             return $ranges->where('airport', '!=', $range['airport'])->push($range);
         })->unique();
 
@@ -281,7 +285,7 @@ class RangeValidator
             return false;
         }
 
-        if(!is_numeric($range['begin']) || !is_numeric($range['end'])) {
+        if (!is_numeric($range['begin']) || !is_numeric($range['end'])) {
             return false;
         }
 
